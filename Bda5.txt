@@ -1,0 +1,61 @@
+from urllib.parse import quote_plus
+from pymongo import MongoClient
+
+db_user = "guk_db_user"
+password = "gayatri123"
+encoded_password = quote_plus(password)
+
+# Replace with your MongoDB connection string
+MONGO_URI = f"mongodb+srv://{db_user}:{encoded_password}@cluster0.k9c1lma.mong"
+
+# Connect to the MongoDB client
+client = MongoClient(MONGO_URI)
+print("Connection Successful!")
+
+# Access a specific database and collection
+db = client['guk_db']
+print("succesful  connect to db")
+collection = db['employees']
+
+# find all employees from New York
+ny_employees = collection.find({"city": "New York"})
+
+# Now, iterate over the results
+print("New York Employees:")
+for employee in ny_employees:
+    print(employee)
+import pandas as pd
+
+# Sample big data (list of dictionaries)
+employee_data = [
+    {"id": 1, "name": "Alice", "age": 30, "city": "New York"},
+    {"id": 2, "name": "Bob", "age": 25, "city": "London"},
+    {"id": 3, "name": "Charlie", "age": 35, "city": "New York"},
+    {"id": 4, "name": "Diana", "age": 28, "city": "Parsi"},
+]
+
+# Insert the data into the collection
+result = collection.insert_many(employee_data)
+print(f"{len(result.inserted_ids)} documents inserted.")
+
+# Find all employees from 'New York'
+my_employees = collection.find({"city": "New York"})
+print("New York Employees:")
+for employee in my_employees:
+    print(employee)
+
+# Convert all documents to a Pandas DataFrame
+all_data = list(collection.find({}))
+df = pd.DataFrame(all_data)
+
+# Drop the MongoDB-specific '_id' column for cleaner data
+if '_id' in df.columns:
+    df = df.drop(columns=['_id'])
+
+# Perform analysis
+avg_age_by_city = df.groupby('city')['age'].mean()
+print("\nAverage Age by City:")
+print(avg_age_by_city)
+
+# Close the connection
+client.close()
